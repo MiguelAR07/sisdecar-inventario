@@ -1,3 +1,6 @@
 node_modules
 dist
 .vercel
+# Versiones de un solo archivo del demo anterior
+sisdecar-demo*.html
+web/
