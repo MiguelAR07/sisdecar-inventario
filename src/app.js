@@ -23,7 +23,7 @@ let view='panel',arg=null,draft=null,inv={q:'',cat:'Todas',low:false},remQ='',pl
 function go(v,a){view=v;arg=a??null;formErr='';if(v==='nueva'&&!draft)draft=newDraft();if(v==='cliente')plateF=null;render();window.scrollTo(0,0)}
 function render(){
   const navKey={remision:'remisiones',cliente:'clientes'}[view]||view;
-  document.querySelectorAll('#nav [data-nav]').forEach(b=>b.classList.toggle('on',b.dataset.nav===navKey));
+  document.querySelectorAll('#nav [data-nav], #tabbar [data-nav]').forEach(b=>b.classList.toggle('on',b.dataset.nav===navKey));
   $('#main').innerHTML=V[view](arg);
 }
 function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
@@ -55,8 +55,8 @@ V.panel=()=>{
     <button class="btn" data-nav="kits">Ver kit de carpado</button></div>
   <div class="grid g2" style="margin-top:16px">
     <div class="panel"><h2>Por reponer</h2>
-      ${bajos.length?`<div class="tw"><table><tr><th>Pieza</th><th class="num">Stock</th><th class="num">Mínimo</th><th></th></tr>
-      ${bajos.map(p=>`<tr><td>${esc(p.nombre)} <span class="code">${p.cod}</span></td><td class="num"><span class="pill bad">${nf(p.stock)} ${p.und}</span></td><td class="num">${nf(p.min)}</td><td class="num"><button class="btn sm" data-act="entrada" data-id="${p.id}">Registrar entrada</button></td></tr>`).join('')}</table></div>`:'<p class="muted">Todo el inventario está sobre el mínimo.</p>'}
+      ${bajos.length?`<div class="tw"><table class="rt"><tr><th>Pieza</th><th class="num">Stock</th><th class="num">Mínimo</th><th></th></tr>
+      ${bajos.map(p=>`<tr><td class="cm">${esc(p.nombre)} <span class="code">${p.cod}</span></td><td class="num" data-label="Stock"><span class="pill bad">${nf(p.stock)} ${p.und}</span></td><td class="num" data-label="Mínimo">${nf(p.min)}</td><td class="num ca"><button class="btn sm" data-act="entrada" data-id="${p.id}">Registrar entrada</button></td></tr>`).join('')}</table></div>`:'<p class="muted">Todo el inventario está sobre el mínimo.</p>'}
     </div>
     <div class="panel"><h2>Ventas por cliente</h2><div class="bars">
       ${porCli.map(x=>`<div class="bar"><span class="name">${esc(x.c.nombre)}</span><span class="t"><i style="width:${x.v/maxV*100}%"></i></span><span class="n">${money(x.v)}</span></div>`).join('')}
@@ -67,8 +67,8 @@ V.panel=()=>{
 
 function remTable(list){
   if(!list.length)return '<p class="muted">No hay remisiones que coincidan.</p>';
-  return `<div class="tw"><table><tr><th>Nº</th><th>Fecha</th><th>Cliente</th><th>Placa</th><th>Técnico</th><th class="num">Total con IVA</th></tr>
-  ${list.map(r=>`<tr class="click" data-act="open-rem" data-num="${r.num}"><td class="code" style="color:var(--red)">${r.num}</td><td>${fdate(r.fecha)}</td><td>${esc(cliente(r.cli)?.nombre)}</td><td><span class="plate">${esc(r.placa)}</span></td><td>${esc(r.tec)}</td><td class="num">${money(totals(r.items).total)}${r.alerta?' <span class="pill warn">revisar</span>':''}</td></tr>`).join('')}</table></div>`;
+  return `<div class="tw"><table class="rt"><tr><th>Nº</th><th>Fecha</th><th>Cliente</th><th>Placa</th><th>Técnico</th><th class="num">Total con IVA</th></tr>
+  ${list.map(r=>`<tr class="click" data-act="open-rem" data-num="${r.num}"><td class="code rem-n" data-label="Remisión">${r.num}</td><td data-label="Fecha">${fdate(r.fecha)}</td><td class="cm">${esc(cliente(r.cli)?.nombre)}</td><td data-label="Placa"><span class="plate">${esc(r.placa)}</span></td><td data-label="Técnico">${esc(r.tec)}</td><td class="num rem-t" data-label="Total con IVA">${money(totals(r.items).total)}${r.alerta?' <span class="pill warn">revisar</span>':''}</td></tr>`).join('')}</table></div>`;
 }
 
 V.inventario=()=>{
@@ -77,21 +77,21 @@ V.inventario=()=>{
   const list=S.piezas.filter(p=>(inv.cat==='Todas'||p.cat===inv.cat)&&(!inv.low||p.stock<p.min)&&(!q||(p.nombre+' '+p.cod).toLowerCase().includes(q)));
   return `<div class="head"><div><h1>Inventario</h1><p class="sub">${S.piezas.length} referencias: el catálogo de sisdecar.com más las piezas del listado del sistema de carpado</p></div>
     <button class="btn primary" data-act="entrada">Registrar entrada</button></div>
-  <div class="toolbar"><input type="search" id="inv-q" placeholder="Buscar pieza o código" value="${esc(inv.q)}" style="width:240px">
-    <div class="chips">${cats.map(c=>`<button class="chip ${inv.cat===c?'on':''}" data-act="cat" data-cat="${c}">${c}</button>`).join('')}</div>
+  <div class="toolbar"><input type="search" id="inv-q" class="search" placeholder="Buscar pieza o código" value="${esc(inv.q)}">
+    <div class="chips scroll">${cats.map(c=>`<button class="chip ${inv.cat===c?'on':''}" data-act="cat" data-cat="${c}">${c}</button>`).join('')}</div>
     <label class="row" style="font-size:13px"><input type="checkbox" id="inv-low" ${inv.low?'checked':''}> Solo bajo mínimo</label></div>
   <div class="tw" id="inv-table">${invTable(list)}</div>
-  ${S.entradas.length?`<div style="margin-top:22px"><h2>Últimas entradas a bodega</h2><div class="tw"><table><tr><th>Fecha</th><th>Pieza</th><th class="num">Cantidad</th><th>Nota</th></tr>
-  ${S.entradas.slice().reverse().slice(0,6).map(e=>`<tr><td>${fdate(e.fecha)}</td><td>${esc(pieza(e.pid)?.nombre)}</td><td class="num">+${nf(e.c)} ${pieza(e.pid)?.und}</td><td class="muted">${esc(e.nota)}</td></tr>`).join('')}</table></div></div>`:''}`;
+  ${S.entradas.length?`<div style="margin-top:22px"><h2>Últimas entradas a bodega</h2><div class="tw"><table class="rt"><tr><th>Fecha</th><th>Pieza</th><th class="num">Cantidad</th><th>Nota</th></tr>
+  ${S.entradas.slice().reverse().slice(0,6).map(e=>`<tr><td class="cm">${esc(pieza(e.pid)?.nombre)}</td><td data-label="Fecha">${fdate(e.fecha)}</td><td class="num" data-label="Cantidad">+${nf(e.c)} ${pieza(e.pid)?.und}</td><td class="muted ca" data-label="Nota">${esc(e.nota)}</td></tr>`).join('')}</table></div></div>`:''}`;
 };
 function invTable(list){
   if(!list.length)return '<p class="muted" style="padding:14px">Ninguna pieza coincide con el filtro.</p>';
-  return `<table><tr><th>Código</th><th>Pieza</th><th>Categoría</th><th class="num">Stock</th><th class="num">Mínimo</th><th>Estado</th><th class="num">Costo</th><th class="num">Precio venta</th><th></th></tr>
+  return `<table class="rt rt-inv"><tr><th>Código</th><th>Pieza</th><th>Categoría</th><th class="num">Stock</th><th class="num">Mínimo</th><th>Estado</th><th class="num">Costo</th><th class="num">Precio venta</th><th></th></tr>
   ${list.map(p=>{const [c,t]=status(p);const pct=Math.min(100,p.stock/(p.min*2)*100);
-    return `<tr><td class="code">${p.cod}</td><td>${esc(p.nombre)}</td><td class="muted">${p.cat}</td>
-    <td class="num">${nf(p.stock)} ${p.und}<span class="stockbar"><i style="width:${pct}%;background:var(--${c})"></i></span></td>
-    <td class="num">${nf(p.min)}</td><td><span class="pill ${c}">${t}</span></td><td class="num">${money(p.costo)}</td><td class="num">${money(p.precio)}</td>
-    <td class="num"><button class="btn sm" data-act="entrada" data-id="${p.id}">+ Entrada</button></td></tr>`}).join('')}</table>`;
+    return `<tr><td class="code rt-code">${p.cod}</td><td class="cm">${esc(p.nombre)}</td><td class="muted hide-sm">${p.cat}</td>
+    <td class="num" data-label="Stock">${nf(p.stock)} ${p.und}<span class="stockbar"><i style="width:${pct}%;background:var(--${c})"></i></span></td>
+    <td class="num hide-sm">${nf(p.min)}</td><td data-label="Estado"><span class="pill ${c}">${t}</span></td><td class="num hide-sm">${money(p.costo)}</td><td class="num" data-label="Precio">${money(p.precio)}</td>
+    <td class="num ca"><button class="btn sm" data-act="entrada" data-id="${p.id}">+ Entrada</button></td></tr>`}).join('')}</table>`;
 }
 
 V.kits=()=>{
@@ -105,9 +105,9 @@ V.kits=()=>{
     <div class="panel kpi"><div class="lbl">Costo del kit</div><div class="val">${money(costo)}</div><div class="note">margen ${Math.round((1-costo/precio)*100)} %</div></div>
     <div class="panel kpi"><div class="lbl">Instalación</div><div class="val">${money(S.servicios[0].precio)}</div><div class="note">servicio aparte</div></div>
   </div>
-  <div class="tw" style="margin-top:16px"><table><tr><th>Código</th><th>Pieza</th><th class="num">Por kit</th><th class="num">En stock</th><th class="num">Alcanza para</th><th class="num">Subtotal</th></tr>
+  <div class="tw" style="margin-top:16px"><table class="rt"><tr><th>Código</th><th>Pieza</th><th class="num">Por kit</th><th class="num">En stock</th><th class="num">Alcanza para</th><th class="num">Subtotal</th></tr>
   ${ps.map(p=>{const a=Math.floor(p.stock/p.kit);const c=a===kp?'bad':a<=kp+1?'warn':'neutral';
-    return `<tr><td class="code">${p.cod}</td><td>${esc(p.nombre)}</td><td class="num">${nf(p.kit)} ${p.und}</td><td class="num">${nf(p.stock)}</td><td class="num"><span class="pill ${c}">${a} kits</span></td><td class="num">${money(p.kit*p.precio)}</td></tr>`}).join('')}</table></div>`;
+    return `<tr><td class="code hide-sm">${p.cod}</td><td class="cm">${esc(p.nombre)}</td><td class="num" data-label="Por kit">${nf(p.kit)} ${p.und}</td><td class="num" data-label="En stock">${nf(p.stock)}</td><td class="num" data-label="Alcanza para"><span class="pill ${c}">${a} kits</span></td><td class="num" data-label="Subtotal">${money(p.kit*p.precio)}</td></tr>`}).join('')}</table></div>`;
 };
 
 V.remisiones=()=>{
@@ -115,7 +115,7 @@ V.remisiones=()=>{
   const list=S.remisiones.slice().sort((a,b)=>b.num-a.num).filter(r=>!q||[r.num,r.placa,r.tec,cliente(r.cli)?.nombre].join(' ').toLowerCase().includes(q));
   return `<div class="head"><div><h1>Remisiones</h1><p class="sub">Consecutivo automático. Cada remisión descuenta del inventario lo que despacha.</p></div>
     <button class="btn primary" data-nav="nueva">+ Nueva remisión</button></div>
-  <div class="toolbar"><input type="search" id="rem-q" placeholder="Buscar por número, cliente, placa o técnico" value="${esc(remQ)}" style="width:min(380px,100%)"></div>
+  <div class="toolbar"><input type="search" id="rem-q" class="search wide" placeholder="Buscar por número, cliente, placa o técnico" value="${esc(remQ)}"></div>
   <div id="rem-list">${remTable(list)}</div>`;
 };
 
@@ -137,8 +137,8 @@ V.remision=num=>{
       <div><span>Ciudad</span>${esc(c?.ciudad||'—')}</div><div><span>Placa</span><span class="plate" style="display:inline-block;margin-top:2px">${esc(r.placa)}</span></div>
     </div>
     <div class="doc-bar">Despachamos a Uds. los siguientes artículos y/o prestamos los servicios</div>
-    <div style="overflow-x:auto"><table><tr><th class="num">Cantidad</th><th>Descripción</th><th class="num">Vr. unitario</th><th class="num">Vr. total</th></tr>
-      ${r.items.map(l=>{const it=item(l.k);return `<tr><td class="num">${nf(l.c)} ${l.k[0]==='p'?it?.und:''}</td><td>${esc(it?.nombre)}${l.k[0]==='s'?' <span class="pill neutral">servicio</span>':''}</td><td class="num">${money(l.v)}</td><td class="num">${money(l.c*l.v)}</td></tr>`}).join('')}
+    <div style="overflow-x:auto"><table class="rt rt3"><tr><th class="num">Cantidad</th><th>Descripción</th><th class="num">Vr. unitario</th><th class="num">Vr. total</th></tr>
+      ${r.items.map(l=>{const it=item(l.k);return `<tr><td class="num" data-label="Cant.">${nf(l.c)} ${l.k[0]==='p'?it?.und:''}</td><td class="cm">${esc(it?.nombre)}${l.k[0]==='s'?' <span class="pill neutral">servicio</span>':''}</td><td class="num" data-label="Vr. unitario">${money(l.v)}</td><td class="num" data-label="Vr. total">${money(l.c*l.v)}</td></tr>`}).join('')}
     </table></div>
     <div class="doc-tot"><dl><dt>Subtotal</dt><dd>${money(t.sub)}</dd><dt>IVA 19 %</dt><dd>${money(t.iva)}</dd><dt class="big">Total</dt><dd class="big">${money(t.total)}</dd></dl></div>
     ${r.obs?`<div style="padding:10px 16px;border-top:1px solid var(--line);font-size:13px"><b>Observaciones:</b> ${esc(r.obs)}</div>`:''}
@@ -159,25 +159,25 @@ V.nueva=()=>{
     <label class="f">Técnico que ejecuta<select id="d-tec">${S.tecnicos.map(x=>`<option ${x===d.tec?'selected':''}>${esc(x)}</option>`).join('')}</select></label>
     <label class="f">Fecha<input type="date" id="d-fecha" value="${d.fecha}"></label>
     <label class="f">Autorizó<input type="text" id="d-aut" placeholder="Nombre de quien autoriza" value="${esc(d.aut)}"></label>
-    <label class="f" style="grid-column:span 3">Observaciones<input type="text" id="d-obs" value="${esc(d.obs)}"></label>
+    <label class="f f-wide">Observaciones<input type="text" id="d-obs" value="${esc(d.obs)}"></label>
   </div></div>
   <div class="panel" style="margin-top:16px">
     <div class="row" style="margin-bottom:10px"><h2 style="margin:0">Artículos y servicios</h2><span class="sp"></span>
       <button class="btn sm" data-act="add-kit">Cargar kit completo</button><button class="btn sm" data-act="add-line">+ Agregar línea</button></div>
-    <div style="overflow-x:auto"><table class="lines"><tr><th>Descripción</th><th class="num">Cantidad</th><th class="num">Vr. unitario</th><th class="num">Total</th><th>Stock</th><th></th></tr>
+    <div style="overflow-x:auto"><table class="lines rt"><tr><th>Descripción</th><th class="num">Cantidad</th><th class="num">Vr. unitario</th><th class="num">Total</th><th>Stock</th><th></th></tr>
     ${d.lines.map((l,i)=>{const it=item(l.k);const p=l.k[0]==='p';const short=p&&l.c>it.stock;
-      return `<tr><td><select data-line="${i}" data-f="k">
+      return `<tr><td class="cm"><select data-line="${i}" data-f="k">
         <optgroup label="Piezas">${S.piezas.map(x=>`<option value="p${x.id}" ${l.k==='p'+x.id?'selected':''}>${esc(x.nombre)} (${x.cod})</option>`).join('')}</optgroup>
         <optgroup label="Servicios">${S.servicios.map(x=>`<option value="s${x.id}" ${l.k==='s'+x.id?'selected':''}>${esc(x.nombre)}</option>`).join('')}</optgroup></select></td>
-        <td class="num"><input type="number" min="0" step="1" data-line="${i}" data-f="c" value="${l.c}"></td>
-        <td class="num"><input type="number" min="0" step="500" data-line="${i}" data-f="v" value="${l.v}" style="width:120px"></td>
-        <td class="num" id="lt-${i}">${money(l.c*l.v)}</td>
-        <td id="ls-${i}">${p?`<span class="pill ${short?'bad':'neutral'}">${nf(it.stock)} ${it.und}</span>`:'<span class="muted">—</span>'}</td>
-        <td><button class="btn sm ghost danger" data-act="del-line" data-i="${i}" aria-label="Quitar línea">✕</button></td></tr>`}).join('')}
+        <td class="num" data-label="Cantidad"><input type="number" min="0" step="1" inputmode="numeric" data-line="${i}" data-f="c" value="${l.c}"></td>
+        <td class="num" data-label="Vr. unitario"><input type="number" min="0" step="500" inputmode="numeric" data-line="${i}" data-f="v" value="${l.v}" class="in-price"></td>
+        <td class="num" data-label="Total" id="lt-${i}">${money(l.c*l.v)}</td>
+        <td data-label="En stock" id="ls-${i}">${p?`<span class="pill ${short?'bad':'neutral'}">${nf(it.stock)} ${it.und}</span>`:'<span class="muted">—</span>'}</td>
+        <td class="del"><button class="btn sm ghost danger" data-act="del-line" data-i="${i}" aria-label="Quitar línea">✕</button></td></tr>`}).join('')}
     </table></div>
     <div class="tot-box" id="tot-box">${totBox()}</div>
   </div>
-  <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn" data-act="cancel">Descartar</button><button class="btn primary" data-act="save">Guardar remisión y descontar inventario</button></div>`;
+  <div class="row actions" style="margin-top:16px;justify-content:flex-end"><button class="btn" data-act="cancel">Descartar</button><button class="btn primary" data-act="save">Guardar remisión y descontar inventario</button></div>`;
 };
 function totBox(){const t=totals(draft.lines);return `<span class="muted">Subtotal ${money(t.sub)}</span><span class="muted">IVA 19 % ${money(t.iva)}</span><span>Total <b>${money(t.total)}</b></span>`}
 
@@ -195,7 +195,7 @@ V.cliente=id=>{
   const c=cliente(id), rs=S.remisiones.filter(r=>r.cli===c.id&&(!plateF||r.placa===plateF)).sort((a,b)=>b.num-a.num);
   return `<div class="head"><div><button class="btn sm ghost" data-nav="clientes">← Clientes</button><h1 style="margin-top:6px">${esc(c.nombre)}</h1><p class="sub">NIT ${esc(c.nit)} · ${esc(c.ciudad||'—')}</p></div>
     <button class="btn primary" data-act="new-for" data-id="${c.id}">+ Remisión para este cliente</button></div>
-  <div class="toolbar"><span class="muted">Vehículos:</span><div class="chips"><button class="chip ${!plateF?'on':''}" data-act="plate" data-p="">Todos</button>${c.placas.map(p=>`<button class="chip ${plateF===p?'on':''}" data-act="plate" data-p="${esc(p)}">${esc(p)}</button>`).join('')}</div></div>
+  <div class="toolbar"><span class="muted">Vehículos:</span><div class="chips scroll"><button class="chip ${!plateF?'on':''}" data-act="plate" data-p="">Todos</button>${c.placas.map(p=>`<button class="chip ${plateF===p?'on':''}" data-act="plate" data-p="${esc(p)}">${esc(p)}</button>`).join('')}</div></div>
   ${remTable(rs)}`;
 };
 
