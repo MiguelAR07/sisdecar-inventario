@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sisdecar Inventario</title>
+<meta name="description" content="Demo de inventario y remisiones digitales para Sisdecar S.A.S.">
+<link rel="icon" type="image/png" href="./logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+  <script type="module" crossorigin src="./assets/index-oFndW-Xc.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-2sS8v4aN.css">
+</head>
+<body>
+<header class="topbar">
+  <img src="./logo.png" alt="Sisdecar" width="250" height="94">
+  <button class="btn primary sm" data-nav="nueva">+ Remisión</button>
+</header>
+<div class="app">
+  <aside>
+    <div class="logo"><img id="logo-img" src="./logo.png" alt="Sisdecar, sistemas de carpado para volquetas" width="250" height="94"><small>Inventario y remisiones</small></div>
+    <nav id="nav">
+      <button data-nav="panel">Panel</button>
+      <button data-nav="inventario">Inventario</button>
+      <button data-nav="kits">Kit de carpado</button>
+      <button data-nav="remisiones">Remisiones</button>
+      <button data-nav="clientes">Clientes y vehículos</button>
+    </nav>
+    <button class="btn primary" data-nav="nueva">+ Nueva remisión</button>
+    <div class="side-foot">
+      <div class="side-contact"><b>Sisdecar S.A.S.</b>Cra. 52 # 117-15, Medellín<br>(604) 366 5931<br>comercial@sisdecar.com</div>
+      <div class="demo-tag">Demo. Los productos vienen de sisdecar.com y del listado de piezas, y la remisión 51506 es la del talonario. Los clientes son los de la web, pero sus remisiones, precios y stock son de ejemplo.</div>
+      <button class="btn sm ghost" id="reset">Restablecer datos del demo</button>
+    </div>
+  </aside>
+  <div class="content">
+    <main id="main"></main>
+    <footer class="m-foot"><b>Sisdecar S.A.S.</b> · Cra. 52 # 117-15, Medellín · (604) 366 5931 · comercial@sisdecar.com<br>Demo: precios, stock y remisiones de ejemplo, salvo la 51506.</footer>
+  </div>
+</div>
+<nav class="tabbar" id="tabbar" aria-label="Secciones">
+  <button data-nav="panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h8V3H3zm0 8h8v-6H3zm10 0h8V11h-8zm0-18v6h8V3z"/></svg>Panel</button>
+  <button data-nav="inventario"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7 12 3 4 7v10l8 4 8-4zM12 5.2 17.6 8 12 10.8 6.4 8zM6 9.6l5 2.5v6.3l-5-2.5zm7 8.8v-6.3l5-2.5v6.3z"/></svg>Inventario</button>
+  <button data-nav="kits"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 15h13V6H2zm15-6h3l2 3v3h-5zM6 19a2 2 0 1 1 0-4 2 2 0 0 1 0 4m12 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4"/></svg>Kit</button>
+  <button data-nav="remisiones"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6zm8 1.5V8h4.5zM8 12h8v1.6H8zm0 3.5h8v1.6H8zm0-7h4v1.6H8z"/></svg>Remisiones</button>
+  <button data-nav="clientes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8m-7 9c0-3.3 3.1-6 7-6s7 2.7 7 6zm15-9a3 3 0 1 1 0-6 3 3 0 0 1 0 6m1.5 9c0-2.4-1-4.4-2.6-5.7 3 .4 6.1 2.4 6.1 5.7z"/></svg>Clientes</button>
+</nav>
+<div id="layer"></div>
+</body>
+</html>
